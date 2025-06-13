@@ -1,0 +1,94 @@
+/* Set the height of the body and html to take full viewport height */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: linear-gradient(to right, #FFB3A6,#FFF3E6,#FFF3E6, #8ED5C5 );
+    height: 100vh;
+    margin: 0;    
+    justify-content: center;
+    align-items: center;
+}
+
+/* Make the card content (chat container) take up all the available space except for the input area */
+.card-body {
+    height: calc(100vh - 100px); /* Subtract space for header and input */
+    overflow-y: auto; /* Allow scrolling when the content exceeds the container height */
+}
+
+.input-group {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Align user message to the right */
+.user-message {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: -10px;
+    margin-bottom: 20px;
+}
+
+/* Align bot message to the left */
+.bot-message {
+    display: flex;
+    justify-content: flex-start;
+    margin-left: -10px;
+    margin-bottom: 20px;
+}
+
+/* Card styling for messages */
+.message-card {
+    max-width: 85%;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.user-card {
+    background-color: #18b7e8;
+    color: white;
+}
+
+.bot-card {
+    background-color: #f0f0f0;
+}
+
+#chat-container {
+    background-image: url(./static/images/background.jpg);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;  /* Keeps it fixed on large screens */
+    height: 70vh;
+    overflow: auto;
+}
+
+/* Media query for smaller devices */
+@media (max-width: 767px) {
+    #chat-container {
+        background-attachment: scroll;  /* Disable fixed background on small devices */
+    }
+}
+
+.full-screen-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 5px;
+}
+
+.typing {
+    display: inline-block;
+    border-right: 3px solid transparent;
+    animation: blink 0.7s infinite step-end;
+}
+
+@keyframes blink {
+    50% {
+        border-color: black;
+    }
+}

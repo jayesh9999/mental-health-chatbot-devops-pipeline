@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Mental Health Assistant</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="full-screen-container">
+    <div class="container">
+        <div class="card border-success mb-3" style="
+    background: url(./static/images/background.jpg) no-repeat center center;
+    background-size: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+">
+    <!-- Navbar Section -->
+    <div class="navbar navbar-expand p-0">
+        <ul class="navbar-nav me-auto align-items-center">
+            <li class="nav-item">
+                <a href="#!" class="nav-link">
+                    <div class="position-relative" style="width:50px; height: 50px; border-radius: 50%; border: 2px solid #18e818">
+                        <img src="{{ url_for('static', filename='images/mentalhealthlogo.webp') }}" class="img-fluid rounded-circle" alt="Mental Health Logo">
+                    </div>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#!" class="nav-link"><b>Mental Health Assistant</b></a>
+            </li>
+        </ul>
+        
+        <!-- Show user info & logout if logged in -->
+        {% if user %}
+        <ul class="navbar-nav ms-auto d-flex align-items-center">
+            <li class="nav-item dropdown">
+                <button class="nav-link dropdown-toggle d-flex align-items-center gap-2" id="userDropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="{{ url_for('static', filename='images/user.png') }}" alt="User Icon" width="32" height="32" class="rounded-circle">
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li class="dropdown-item-text">
+                        <strong>{{ user.username }}</strong> (<small>{{ user.email }}</small>)
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+        {% endif %}
+
+    </div>
+    
+    <!-- Chat Container (Card with Background Image) -->
+    <div class="card p-4" style="
+        height: 70vh;
+        overflow-y: auto; /* Allows scrolling if the content exceeds the card height */
+        background: transparent; /* Ensure no background image here */
+        border-radius: 10px;
+        
+        padding: 15px;
+    " id="chat-container">
+        <!-- Messages will appear here -->
+    </div>
+
+    <!-- Input Section -->
+    <div class="input-group mb-3" style="padding: 10px;">
+        <input type="text" class="form-control" id="user-message" placeholder="I'm here to listen, share your thoughts" aria-label="User message" aria-describedby="button-send">
+        <button class="btn btn-success" id="send-message" type="button">Send</button>
+    </div>
+</div>
+
+    </div>
+    </div>
+   
+    {% if not user %}
+<!-- Login Choice Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginModalLabel">Welcome to Your Mental Health Assistant</h5>
+      </div>
+      <div class="modal-body">
+        <p>Would you like to log in so your conversations can be saved for future reference?</p>
+        <p class="text-muted small">You can continue without logging in — your chats will remain private but won’t be saved.</p>
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <a href="/login" class="btn btn-primary">Log In</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Without Saving</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
+    });
+</script>
+{% endif %}
+    
+    <script type="module">
+        import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+
+        const sendButton = document.getElementById('send-message');
+        const userInput = document.getElementById('user-message');
+        const chatContainer = document.getElementById('chat-container');
+
+        window.onload = function() {
+        userInput.focus();
+        };
+        
+        function sendMessage() {
+            const userMessage = userInput.value.trim();
+            if (userMessage) {
+                // Display user message
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.classList.add('user-message');
+                userMessageDiv.innerHTML = `                    
+                    <div class="message-card user-card">  <!-- Added styling class for user -->
+                        ${userMessage}
+                    </div>
+                    
+                `;
+                chatContainer.appendChild(userMessageDiv);
+
+                // Clear the input field
+                userInput.value = '';
+                
+                // Scroll to the bottom of the chat
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                // Make an API call to Flask backend (replace with your API endpoint)
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({ message: userMessage })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const botMessageDiv = document.createElement('div');
+                    botMessageDiv.classList.add('bot-message' );
+                    const markdownResponse = data.response;
+                    const formattedResponse = marked(markdownResponse);
+                    botMessageDiv.innerHTML = `
+                        <div class="message-card bot-card">  <!-- Added styling class for bot -->
+                            <span id="bot-typing"></span>
+                        </div>                      
+                    `;
+                    chatContainer.appendChild(botMessageDiv);
+                    
+                    typeMessage(formattedResponse, botMessageDiv);
+
+                    // Scroll to the bottom after receiving the bot's reply
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        }
+        
+        // Typing effect function
+        function typeMessage(message, botMessageDiv) {
+            const botMessageElement = botMessageDiv.querySelector('.message-card');
+            let index = 0;
+            const typingSpeed = 30;
+
+            // Temporarily hide the content while typing out
+            botMessageElement.innerHTML = ''; 
+
+            // Create a temporary div to process the HTML content for typing effect
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = message;  // Parse the HTML content (e.g., markdown)
+
+            // Function to simulate typing, handling HTML and text nodes separately
+            const typingInterval = setInterval(() => {
+                // Get the text content from the temp div to simulate typing character by character
+                const currentContent = tempDiv.innerHTML.slice(0, index + 1);
+
+                // Update botMessageElement with sliced HTML to simulate typing
+                botMessageElement.innerHTML = currentContent;
+
+                index++;
+
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                // Once all content has been typed, stop the interval
+                if (index === message.length) {
+                    clearInterval(typingInterval);
+                }
+            }, typingSpeed);
+        }
+    
+    function appendToChat(sender, text) {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = sender === "user" ? "user-message" : "bot-message";
+
+    const bubbleDiv = document.createElement("div");
+    bubbleDiv.className = sender === "user" ? "message-card user-card" : "message-card bot-card";
+    bubbleDiv.innerText = text;
+
+    messageDiv.appendChild(bubbleDiv);
+    chatContainer.appendChild(messageDiv);
+    }
+
+
+        fetch("/messages", {
+            method: "GET",
+            credentials: "include"
+            })
+        .then(res => res.json())
+        .then(messages => {
+            messages.forEach(msg => {
+            appendToChat("user", msg.user);
+            appendToChat("bot", msg.bot);
+        });
+
+    // Scroll to bottom of chat
+    const chatContainer = document.getElementById("chat-container");
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    });
+
+
+        sendButton.addEventListener('click', sendMessage);
+
+        // Send message when "Enter" key is pressed
+        userInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();  // Prevents the default action (like submitting a form)
+                sendMessage();  // Call the function to send the message
+            }
+        });
+       
+    </script>
+
+
+</body>
+
+</html>

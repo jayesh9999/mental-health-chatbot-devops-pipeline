@@ -1,0 +1,17 @@
+.git
+.gitignore
+.gitattributes
+
+__pycache__
+*.pyo
+*.pyc
+*.pyd
+
+.venv/
+env/
+venv/
+*.env
+.env*
+
+.dockerignore
+Jenkinsfile

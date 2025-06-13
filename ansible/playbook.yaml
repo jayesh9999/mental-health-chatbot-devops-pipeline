@@ -1,0 +1,79 @@
+---
+- name: install docker
+  hosts: ec2
+  become: yes
+
+  vars:
+    docker_compose_version: "2.37.0"
+    docker_compose_path: "/usr/local/bin/docker-compose"
+    user_name: "ubuntu"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install prerequisite packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - git
+          - python3
+          - python3-pip
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Update apt cache after adding Docker repo
+      apt:
+        update_cache: yes
+
+    - name: Install Docker CE
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Add user to docker group
+      user:
+        name: "{{ user_name }}"
+        groups: docker
+        append: yes
+
+    - name: Download Docker Compose binary
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/v{{ docker_compose_version }}/docker-compose-{{ ansible_system | lower }}-{{ ansible_machine }}"
+        dest: "{{ docker_compose_path }}"
+        mode: '0755'
+
+    - name: Verify Docker is installed
+      command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - debug:
+        msg: "Docker version installed: {{ docker_version.stdout }}"
+
+    - name: Verify Docker Compose is installed
+      command: docker-compose --version
+      register: compose_version
+      changed_when: false
+
+    - debug:
+        msg: "Docker Compose version installed: {{ compose_version.stdout }}"
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
