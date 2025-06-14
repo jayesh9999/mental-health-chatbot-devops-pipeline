@@ -94,17 +94,6 @@ PostgreSQL
 
 Nginx reverse proxy
 
-Nginx serves static files and forwards requests to the app.
-
-🚧 CI/CD Pipeline Diagram
-
-GitHub Push → Jenkins Webhook Trigger
-          ↳ Build Docker Image
-          ↳ Push to Docker Hub
-          ↳ SSH to EC2
-          ↳ Pull Image
-          ↳ docker-compose up -d
-
 🎮 Features of the Chatbot
 
 Empathetic and professional tone in responses
@@ -116,7 +105,9 @@ User login and chat history storage
 🚩 How to Run Locally (Optional)
 
 git clone https://github.com/your-username/mental-health-chatbot.git
+
 cd mental-health-chatbot
+
 docker-compose up --build
 
 App will be available at: http://localhost
